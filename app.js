@@ -39,6 +39,39 @@ const typeChart = {
   Fairy: { Dragon: 2, Fighting: 2, Dark: 2, Fire: 0.5, Steel: 0.5 }
 };
 
+function getNatureModifier(natureName, statKey) {
+  const nature = NATURES[natureName] ?? { mod: 'Neutral' };
+  return nature[statKey] ?? 1;
+}
+
+const NATURES = {
+  Hardy: { mod: 'Neutral' },
+  Docile: { mod: 'Neutral' },
+  Serious: { mod: 'Neutral' },
+  Bashful: { mod: 'Neutral' },
+  Quirky: { mod: 'Neutral' },
+  Adamant: { mod: '+Atk, -SpA', atk: 1.1, spa: 0.9 },
+  Brave: { mod: '+Atk, -Spe', atk: 1.1, spe: 0.9 },
+  Lonely: { mod: '+Atk, -Def', atk: 1.1, def: 0.9 },
+  Naughty: { mod: '+Atk, -SpD', atk: 1.1, spd: 0.9 },
+  Bold: { mod: '+Def, -Atk', def: 1.1, atk: 0.9 },
+  Relaxed: { mod: '+Def, -Spe', def: 1.1, spe: 0.9 },
+  Impish: { mod: '+Def, -SpA', def: 1.1, spa: 0.9 },
+  Lax: { mod: '+Def, -SpD', def: 1.1, spd: 0.9 },
+  Modest: { mod: '+SpA, -Atk', spa: 1.1, atk: 0.9 },
+  Quiet: { mod: '+SpA, -Spe', spa: 1.1, spe: 0.9 },
+  Mild: { mod: '+SpA, -Def', spa: 1.1, def: 0.9 },
+  Rash: { mod: '+SpA, -SpD', spa: 1.1, spd: 0.9 },
+  Calm: { mod: '+SpD, -Atk', spd: 1.1, atk: 0.9 },
+  Sassy: { mod: '+SpD, -Spe', spd: 1.1, spe: 0.9 },
+  Gentle: { mod: '+SpD, -Def', spd: 1.1, def: 0.9 },
+  Careful: { mod: '+SpD, -SpA', spd: 1.1, spa: 0.9 },
+  Timid: { mod: '+Spe, -Atk', spe: 1.1, atk: 0.9 },
+  Jolly: { mod: '+Spe, -SpA', spe: 1.1, spa: 0.9 },
+  Hasty: { mod: '+Spe, -Def', spe: 1.1, def: 0.9 },
+  Naive: { mod: '+Spe, -SpD', spe: 1.1, spd: 0.9 }
+};
+
 const POKECOUNTER_RAW_BASE = 'https://raw.githubusercontent.com/J4PN/PokeCounter.app/main/src/data';
 
 const state = {
