@@ -140,31 +140,37 @@ function renderTeam() {
   });
 }
 
-function renderRecommendations() {
-  const list = byId('recommendList');
-  list.innerHTML = '';
+function synergyScore(mon, team) {
+  const existingTypes = new Set(team.flatMap((p) => p.types));
+  const typeBonus = mon.types.reduce((acc, type) => acc + (!existingTypes.has(type) ? 4 : 0), 0);
+  const duplicatePenalty = team.some((p) => p.name === mon.name) ? -999 : 0;
+  const weaknessBonus = getWeaknessCoverageBonus(mon, team);
+  return mon.tierScore + typeBonus + weaknessBonus + duplicatePenalty;
+}
 
-  const recommendations = pokemonPool
-    .filter((mon) => mon.archetypes.includes(state.archetype))
-    .sort((a, b) => synergyScore(b, state.team) - synergyScore(a, state.team))
-    .slice(0, 10);
+function getTeamWeakTypes(team) {
+  if (!team.length) {
+    return [];
+  }
 
-  recommendations.forEach((mon) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<strong>${mon.name}</strong> <span class="muted">(${mon.role})</span>`;
-    const button = document.createElement('button');
-    button.className = 'inline-btn';
-    button.textContent = 'Add';
-    button.disabled = state.team.length >= 6 || state.team.some((m) => m.name === mon.name);
-    button.onclick = () => {
-      if (state.team.length < 6 && !state.team.some((m) => m.name === mon.name)) {
-        state.team = [...state.team, mon];
-        renderAll();
-      }
-    };
-    li.appendChild(button);
-    list.appendChild(li);
+  return Object.keys(typeChart).filter((attackType) => {
+    const avgMultiplier = team.reduce((sum, mon) => sum + effectiveness(attackType, mon.types), 0) / team.length;
+    return avgMultiplier > 1.1;
   });
+}
+
+function getWeaknessCoverageBonus(mon, team) {
+  const weakTypes = getTeamWeakTypes(team);
+  if (!weakTypes.length) {
+    return 0;
+  }
+
+  return weakTypes.reduce((score, attackType) => {
+    const multiplier = effectiveness(attackType, mon.types);
+    if (multiplier < 1) return score + 6;
+    if (multiplier > 1) return score - 3;
+    return score;
+  }, 0);
 }
 
 function teamStrength(team) {
@@ -183,6 +189,72 @@ function renderExternalMetaTeams() {
     return;
   }
 
+const recommendations = getPokemonDataset()
+  .filter((mon) => mon.name.toLowerCase().includes(state.pokemonSearch.toLowerCase()))
+  .filter((mon) => mon.archetypes.includes(state.archetype))
+  .sort((a, b) => synergyScore(b, state.team) - synergyScore(a, state.team))
+  .slice(0, 10);
+
+  function normalizeCodexToDexMap(codexJson) {
+  const rawPokemon = codexJson.pokemon ?? codexJson;
+  const dexMap = {};
+
+  Object.entries(rawPokemon).forEach(([name, entry]) => {
+    const types = Array.isArray(entry.types) ? entry.types : ['Normal'];
+    const baseStats = Array.isArray(entry.baseStats)
+      ? entry.baseStats
+      : entry.baseStats
+        ? [entry.baseStats.hp, entry.baseStats.atk, entry.baseStats.def, entry.baseStats.spa ?? entry.baseStats.spAtk, entry.baseStats.spd ?? entry.baseStats.spDef, entry.baseStats.spe ?? entry.baseStats.speed]
+        : [80, 80, 80, 80, 80, 80];
+    const legalMoves = Array.isArray(entry.legalMoves) ? entry.legalMoves : (Array.isArray(entry.moves) ? entry.moves : []);
+
+    dexMap[name] = {
+      types,
+      baseStats: baseStats.map((value) => Number(value) || 80),
+      legalMoves
+    };
+  });
+
+  return dexMap;
+}
+
+function applyAbilitiesPatch(dexMap, patchJson) {
+  const abilityMap = patchJson.pokemon_abilities ?? patchJson;
+  Object.entries(abilityMap).forEach(([name, abilities]) => {
+    if (dexMap[name]) {
+      dexMap[name].abilities = Array.isArray(abilities) ? abilities : [];
+    }
+  });
+}
+
+function importCodexFiles() {
+  const status = byId('codexStatus');
+  const masterText = byId('codexMasterInput').value || '';
+  const patchText = byId('abilitiesPatchInput').value || '';
+
+  try {
+    const masterJson = JSON.parse(masterText);
+    const dexMap = normalizeCodexToDexMap(masterJson);
+    if (patchText.trim()) {
+      const patchJson = JSON.parse(patchText);
+      applyAbilitiesPatch(dexMap, patchJson);
+    }
+
+    const imported = convertImportedPokemon(dexMap);
+    state.external.importedPokemonDex = imported;
+    state.team = [];
+    ['attacker', 'defender', 'move'].forEach((id) => {
+      byId(id).innerHTML = '';
+    });
+    status.textContent = `Imported ${imported.length} Pokémon from codex files.`;
+    status.classList.remove('error-text');
+    renderAll();
+  } catch (error) {
+    status.textContent = `Codex import failed: ${error.message}`;
+    status.classList.add('error-text');
+  }
+}
+  
   wrapper.classList.remove('hidden');
   list.innerHTML = '';
 
@@ -374,6 +446,13 @@ function renderAll() {
   runDamageCalc();
   renderExternalMetaTeams();
 }
+
+byId('importCodexBtn').addEventListener('click', importCodexFiles);
+
+byId('itemSearch').addEventListener('input', (e) => {
+  state.itemSearch = e.target.value;
+  renderLegalItems();
+});
 
 ['attackerNature', 'defenderNature'].forEach((id) => {
   byId(id).addEventListener('change', runDamageCalc);
