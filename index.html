@@ -42,6 +42,24 @@
           </div>
         </div>
       </section>
+      <h3>Legal Items</h3>
+<label>
+  Search Legal Items
+  <input id="itemSearch" type="text" placeholder="Search item name..." />
+</label>
+<ul id="legalItemsList"></ul>
+      <h3>Import Champions Codex Files</h3>
+<p class="muted">Paste <code>champions_codex_master.json</code> and optional <code>champions_abilities_patch.json</code>.</p>
+<label>
+  champions_codex_master.json
+  <textarea id="codexMasterInput" rows="8" placeholder='Paste full champions_codex_master.json here...'></textarea>
+</label>
+<label>
+  champions_abilities_patch.json (optional)
+  <textarea id="abilitiesPatchInput" rows="6" placeholder='Paste full champions_abilities_patch.json here...'></textarea>
+</label>
+<button id="importCodexBtn">Import Codex + Abilities</button>
+<p id="codexStatus" class="muted"></p>
 
       <section id="meta-tab" class="panel tab-panel hidden">
         <h2>Simulation + Meta Analysis</h2>
