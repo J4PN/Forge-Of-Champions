@@ -1,30 +1,58 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/data/README.md b/data/README.md
-new file mode 100644
-index 0000000000000000000000000000000000000000..b0a497542fb6a9ab94ff4129665efd51a676b5f5
---- /dev/null
-+++ b/data/README.md
-@@ -0,0 +1,20 @@
-+# Data Files
+diff --git a/README.md b/README.md
+index b284885da0d08a3df73033a57159d27ac2e64d71..6db955e7acf47b7d063954ab02e4a8ac3406efcc 100644
+--- a/README.md
++++ b/README.md
+@@ -1 +1,47 @@
+-# Forge-Of-Champions
+\ No newline at end of file
++# Forge-Of-Champions
 +
-+- `moves.json` is your move-dex file to pair with your Pokémon dataset.
-+- Format per move:
++A Pokémon team-building website prototype with:
 +
-+```json
-+"Move Name": {
-+  "type": "Grass",
-+  "category": "Special",
-+  "basePower": 90,
-+  "accuracy": 100,
-+  "pp": 10,
-+  "effect": "Text describing side effects"
-+}
++- Tabbed layout: Team Building, Meta, Calc, and Sources.
++- Archetype-driven team builder and recommendation engine.
++- Configurable game simulation and meta usage analysis.
++- Integrated damage calculator panel.
++
++## Run locally
++
++### Option 1 (recommended)
++
++```bash
++./start-site.sh
 +```
 +
-+## Stat order reminder
-+For Pokémon base stats, use:
++Then open `http://localhost:8080`.
 +
-+`[hp, atk, def, spAtk, spDef, spe]`
++### Option 2
++
++```bash
++make run
++```
++
++## About your "copy files from repos" request
++
++You asked me to copy files from your `pokecounter` and damage calc repos from your profile, but your profile/repository URLs were not included in this environment. I built a complete first version in this repo so you can start using it immediately.
++
++Share the exact GitHub URLs and desired folders, and I can do a direct import in a follow-up.
++
++## PokeCounter integration
++
++Connected source repo: https://github.com/J4PN/PokeCounter.app/tree/main
++
++Open the **Sources** tab in the app and click **Load Data From PokeCounter** to pull:
++- `src/data/pokemon.json`
++- `src/data/meta-teams.json`
++- `src/data/tiers.json`
++
++Loaded teams are then shown in the **Meta** tab under **PokeCounter Imported Meta Teams**.
++
++
++## Raw text parser (items + Pokémon list)
++
++In the **Sources** tab, you can now paste raw text dumps (like item tables and Pokémon availability lists) and click **Parse Raw Data**.
++It will extract held item / mega stone / berry names and Pokémon names into structured lists in-app.
  
 EOF
 )
