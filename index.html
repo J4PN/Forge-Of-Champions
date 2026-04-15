@@ -1,0 +1,138 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..a10d57cd41c4b7eb0cc609834fd17fe2c7b61c42
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,128 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>Forge of Champions</title>
++    <link rel="stylesheet" href="styles.css" />
++  </head>
++  <body>
++    <main>
++      <header>
++        <h1>Forge of Champions</h1>
++        <p>
++          Build a Pokémon team around a chosen archetype, get recommendations, simulate a configurable number of games,
++          inspect meta analysis, and run integrated damage calculations.
++        </p>
++      </header>
++
++      <nav class="tabs" aria-label="Main sections">
++        <button class="tab-btn active" data-tab="team-tab">Team Building</button>
++        <button class="tab-btn" data-tab="meta-tab">Meta</button>
++        <button class="tab-btn" data-tab="calc-tab">Calc</button>
++        <button class="tab-btn" data-tab="sources-tab">Sources</button>
++      </nav>
++
++      <section id="team-tab" class="panel tab-panel active">
++        <h2>Team Builder</h2>
++        <label>
++          Archetype
++          <select id="archetype"></select>
++        </label>
++        <p id="archetypeGoal" class="muted"></p>
++
++        <div class="split-grid">
++          <div>
++            <h3>Current Team <span id="teamCount">(0/6)</span></h3>
++            <ul id="teamList"></ul>
++          </div>
++          <div>
++            <h3>Recommendations</h3>
++            <ul id="recommendList"></ul>
++          </div>
++        </div>
++      </section>
++
++      <section id="meta-tab" class="panel tab-panel hidden">
++        <h2>Simulation + Meta Analysis</h2>
++        <label>
++          Number of Games
++          <input id="gameCount" type="number" min="10" max="2000" step="10" value="100" />
++        </label>
++        <button id="simulateBtn">Simulate Games</button>
++
++        <div id="simResult" class="hidden">
++          <div class="stat-grid">
++            <article><h3>Win Rate</h3><p id="winRate"></p></article>
++            <article><h3>Record</h3><p id="record"></p></article>
++            <article><h3>Games</h3><p id="gamesPlayed"></p></article>
++          </div>
++
++          <h3>Meta Leaders (simulated)</h3>
++          <ul id="metaList"></ul>
++        </div>
++
++        <div id="externalMetaWrap" class="hidden">
++          <h3>PokeCounter Imported Meta Teams</h3>
++          <ul id="externalMetaList"></ul>
++        </div>
++      </section>
++
++      <section id="calc-tab" class="panel tab-panel hidden">
++        <h2>Integrated Damage Calc</h2>
++        <div class="split-grid">
++          <label>
++            Attacker
++            <select id="attacker"></select>
++          </label>
++          <label>
++            Defender
++            <select id="defender"></select>
++          </label>
++        </div>
++
++        <label>
++          Move
++          <select id="move"></select>
++        </label>
++
++        <p id="damageRange"></p>
++        <p id="damageNotes" class="muted"></p>
++      </section>
++
++      <section id="sources-tab" class="panel tab-panel hidden">
++        <h2>Sources</h2>
++        <p class="muted">Connected repo source:</p>
++        <p><a href="https://github.com/J4PN/PokeCounter.app/tree/main" target="_blank" rel="noreferrer">J4PN/PokeCounter.app</a></p>
++        <button id="loadSourceBtn">Load Data From PokeCounter</button>
++        <p id="sourceStatus" class="muted"></p>
++
++        <h3>Local + Remote Source Notes</h3>
++        <ul>
++          <li><strong>Team builder starter roster:</strong> local curated seed in <code>app.js</code>.</li>
++          <li><strong>Imported meta teams:</strong> loaded from <code>src/data/meta-teams.json</code> in your PokeCounter repo.</li>
++          <li><strong>Imported Pokédex mapping:</strong> loaded from <code>src/data/pokemon.json</code> for Pokémon ID → name mapping.</li>
++          <li><strong>Imported tier data:</strong> loaded from <code>src/data/tiers.json</code>.</li>
++        </ul>
++
++        <h3>Import Raw Items/Pokémon Text</h3>
++        <p class="muted">Paste the raw item + Pokémon list text (like you sent in chat), then parse it.</p>
++        <label>
++          Raw Data
++          <textarea id="rawDataInput" rows="10" placeholder="Paste raw Items / Mega Stones / Berries / Pokémon list text here..."></textarea>
++        </label>
++        <button id="parseRawBtn">Parse Raw Data</button>
++        <p id="rawParseStatus" class="muted"></p>
++
++        <div id="rawParsedWrap" class="hidden">
++          <h4>Parsed Held Items / Mega Stones / Berries</h4>
++          <ul id="rawItemsList"></ul>
++          <h4>Parsed Pokémon Names</h4>
++          <ul id="rawPokemonList"></ul>
++        </div>
++      </section>
++    </main>
++
++    <script src="app.js"></script>
++  </body>
++</html>
+ 
+EOF
+)
