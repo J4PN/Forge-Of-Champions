@@ -271,7 +271,19 @@ function runDamageCalc() {
   if (!attacker || !defender || !move) {
     return;
   }
-
+['attackerNature', 'defenderNature'].forEach((id) => {
+  const select = byId(id);
+  if (!select.options.length) {
+    Object.entries(NATURES).forEach(([name, details]) => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = `${name} (${details.mod})`;
+      select.appendChild(option);
+    });
+  }
+});
+byId('attackerNature').value = byId('attackerNature').value || 'Hardy';
+byId('defenderNature').value = byId('defenderNature').value || 'Hardy';
   const attackStat = move.category === 'Physical' ? attacker.baseStats.atk : attacker.baseStats.spa;
   const defenseStat = move.category === 'Physical' ? defender.baseStats.def : defender.baseStats.spd;
   const stab = attacker.types.includes(move.type) ? 1.5 : 1;
@@ -283,9 +295,19 @@ function runDamageCalc() {
   const minPct = ((min / defenderHP) * 100).toFixed(1);
   const maxPct = ((max / defenderHP) * 100).toFixed(1);
   const ko = max >= defenderHP ? 'Possible OHKO' : max * 2 >= defenderHP ? 'Likely 2HKO' : '3HKO or slower';
+const attackerNature = byId('attackerNature').value || 'Hardy';
+const defenderNature = byId('defenderNature').value || 'Hardy';
 
+const boostedAtk = Math.floor((attacker.baseStats.atk + state.sp.atk) * getNatureModifier(attackerNature, 'atk'));
+const boostedSpA = Math.floor((attacker.baseStats.spa + state.sp.spa) * getNatureModifier(attackerNature, 'spa'));
+const boostedDef = Math.floor(defender.baseStats.def * getNatureModifier(defenderNature, 'def'));
+const boostedSpD = Math.floor(defender.baseStats.spd * getNatureModifier(defenderNature, 'spd'));
+
+const attackStat = move.category === 'Physical' ? boostedAtk : boostedSpA;
+const defenseStat = move.category === 'Physical' ? boostedDef : boostedSpD;
   byId('damageRange').innerHTML = `<strong>Damage Range:</strong> ${min} - ${max} (${minPct}% - ${maxPct}%)`;
   byId('damageNotes').textContent = `Effectiveness: ${eff}x • ${ko}`;
+  byId('damageNotes').textContent = `Effectiveness: ${eff}x • ${ko} • A:${attackerNature} / D:${defenderNature} • ${move.effect ?? 'No additional effect data.'}`;
 }
 
 function activateTab(tabId) {
@@ -352,6 +374,10 @@ function renderAll() {
   runDamageCalc();
   renderExternalMetaTeams();
 }
+
+['attackerNature', 'defenderNature'].forEach((id) => {
+  byId(id).addEventListener('change', runDamageCalc);
+});
 
 byId('archetype').addEventListener('change', (e) => {
   state.archetype = e.target.value;
